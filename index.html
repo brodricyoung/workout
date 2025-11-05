@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7-Week Conditioning Tracker</title>
+<style>
+  body {background:#0b1220;color:#e6eef6;font-family:system-ui,sans-serif;margin:0;padding:16px;}
+  .container{max-width:700px;margin:auto;}
+  h1{text-align:center;margin:8px 0 12px;}
+  details{border:1px solid rgba(255,255,255,0.15);border-radius:8px;margin:10px;background:rgba(255,255,255,0.03);}
+  summary{padding:12px 16px;font-weight:600;cursor:pointer;}
+  details[open]>summary{background:rgba(255,255,255,0.06);}
+  .workout summary{font-size:14px;font-weight:500;background:rgba(255,255,255,0.05);}
+  .workout-body{padding:10px 16px;font-size:14px;}
+  button{background:#1d2b4f;border:none;color:#fff;padding:8px 12px;border-radius:6px;font-size:14px;margin-top:6px;width:100%;cursor:pointer;}
+  button:hover{background:#2e4680;}
+  @media(max-width:600px){
+    body{padding:10px;font-size:15px;}
+    summary{padding:10px;}
+    button{font-size:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>7-Week Conditioning Tracker</h1>
+  <div id="weeks"></div>
+  <button onclick="resetProgress()">Reset Progress</button>
+</div>
+
+<script>
+const A={name:"Workout A — Strength & Power",exercises:[
+ ["Leg Press","4","10","Controlled descent, push heavy but safe."],
+ ["Chest Press ","3","10","Strict form."],
+ ["Seated Row","3","12","Squeeze shoulder blades."],
+ ["Lat Pulldown","3","10","Full extension each rep."],
+ ["Shoulder Press","3","10","Moderate weight."],
+ ["Ab Crunch","3","15–20","Controlled tempo."],
+ ["Treadmill Hill Walk","1","10 min","10% incline, brisk pace."]
+]};
+const B={name:"Workout B — Cardio Conditioning",exercises:[
+ ["Intervals","1","20 min","1 min jog / 30 s faster."],
+ ["Leg Curl","3","15","Slow eccentric."],
+ ["Leg Extension","3","15","Moderate weight."],
+ ["Chest Fly","3","15","Stretch & contract fully."],
+ ["Lat Pulldown (wide)","3","15","Light–moderate."],
+ ["Ab Crunch","3","12–15","Controlled reps."],
+ ["Treadmill Hill Walk","1","10 min","10% incline, brisk pace."]
+]};
+const totalWeeks=7;
+let progress=JSON.parse(localStorage.getItem('progress')||'{}');
+
+function render(){
+  const container=document.getElementById('weeks'); container.innerHTML='';
+  for(let i=1;i<=totalWeeks;i++){
+    const firstA=i%2===1; const wkA=firstA?A:B; const wkB=firstA?B:A;
+    const weekData=progress[`week${i}`]||{};
+    const weekEl=document.createElement('details');
+    weekEl.innerHTML=`
+      <summary>Week ${i} ${weekData.done?'✅':''}</summary>
+      <div class="workouts">
+        ${renderWorkout(i,'A',wkA,weekData.A)}
+        ${renderWorkout(i,'B',wkB,weekData.B)}
+      </div>`;
+    container.appendChild(weekEl);
+  }
+}
+
+function renderWorkout(week,label,data,workoutProgress={}){
+  const done=workoutProgress?.done;
+  return `
+  <details class="workout">
+    <summary>${data.name} ${done?'✅':''}</summary>
+    <div class="workout-body">
+      <button onclick="startWorkout(${week},'${label}')">Start Workout</button>
+      <ul>
+        ${data.exercises.map(ex=>`<li>${ex[0]} — ${ex[1]} × ${ex[2]}</li>`).join('')}
+      </ul>
+    </div>
+  </details>`;
+}
+
+function startWorkout(week,label){ location.href=`workout.html?week=${week}&label=${label}`; }
+function resetProgress(){ if(confirm('Reset all progress?')){localStorage.removeItem('progress');progress={};render();} }
+render();
+</script>
+</body>
+</html>

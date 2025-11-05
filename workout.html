@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workout</title>
+<style>
+  body{background:#0b1220;color:#e6eef6;font-family:system-ui,sans-serif;margin:25px;padding:16px;}
+  .container{max-width:600px;margin:auto;}
+  h2{text-align:center;margin-bottom:4px;}
+  #list{margin-top:50px; border-top:3px solid rgba(255,255,255,2);}
+  .exercise{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid rgba(255,255,255,2);padding:10px 0;}
+  .exercise-info{flex:1;}
+  input[type=checkbox]{transform:scale(1.3);}
+  a.back{display:inline-block;margin-bottom:16px;color:#9cb3ff;text-decoration:none;}
+  @media(max-width:600px){body{padding:12px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="back">← Back</a>
+  <h2 id="title"></h2>
+  <div id="list"></div>
+</div>
+
+<script>
+const params=new URLSearchParams(location.search);
+const week=+params.get('week');
+const label=params.get('label');
+const A={name:"Workout A — Strength & Power",exercises:[
+ ["Leg Press","4","10","Controlled descent, push heavy but safe."],
+ ["Chest Press ","3","10","Strict form."],
+ ["Seated Row","3","12","Squeeze shoulder blades."],
+ ["Lat Pulldown","3","10","Full extension each rep."],
+ ["Shoulder Press","3","10","Moderate weight."],
+ ["Ab Crunch","3","15–20","Controlled tempo."],
+ ["Treadmill Hill Walk","1","10 min","10% incline, brisk pace."]
+]};
+const B={name:"Workout B — Cardio Conditioning",exercises:[
+ ["Intervals","1","20 min","1 min jog / 30 s faster."],
+ ["Leg Curl","3","15","Slow eccentric."],
+ ["Leg Extension","3","15","Moderate weight."],
+ ["Chest Fly","3","15","Stretch & contract fully."],
+ ["Lat Pulldown (wide)","3","15","Light–moderate."],
+ ["Ab Crunch","3","12–15","Controlled reps."],
+ ["Treadmill Hill Walk","1","10 min","10% incline, brisk pace."]
+]};
+const data=(label==='A'?(week%2===1?A:B):(week%2===1?B:A));
+let progress=JSON.parse(localStorage.getItem('progress')||'{}');
+const weekKey=`week${week}`;
+progress[weekKey]=progress[weekKey]||{};
+progress[weekKey][label]=progress[weekKey][label]||{};
+document.getElementById('title').textContent=`Week ${week} — ${data.name}`;
+const list=document.getElementById('list');
+
+data.exercises.forEach((ex,i)=>{
+  const div=document.createElement('div');
+  div.className='exercise';
+  div.innerHTML=`<div class="exercise-info"><strong>${ex[0]}</strong><br><small>${ex[1]} × ${ex[2]}</small><br><em>${ex[3]}</em></div>
+  <input type="checkbox" ${progress[weekKey][label][i]?'checked':''}>`;
+  div.querySelector('input').onchange=e=>{
+    progress[weekKey][label][i]=e.target.checked;
+    progress[weekKey][label].done=data.exercises.every((_,j)=>progress[weekKey][label][j]);
+    progress[weekKey].done=(progress[weekKey].A?.done&&progress[weekKey].B?.done);
+    localStorage.setItem('progress',JSON.stringify(progress));
+  };
+  list.appendChild(div);
+});
+</script>
+</body>
+</html>
